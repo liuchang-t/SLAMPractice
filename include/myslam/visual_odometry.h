@@ -5,6 +5,7 @@
 #include "myslam/map.h"
 
 #include <opencv2/features2d/features2d.hpp>
+#include "myslam/g2o_types.h"
 
 namespace myslam
 {

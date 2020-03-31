@@ -185,10 +185,49 @@ namespace myslam
         Eigen::Quaterniond quater = Eigen::Quaterniond(rotation_vector);
         ////////////////////////////////////////////////
         // 其实有了四元数或者旋转矩阵之后，就可以和平移向量一起直接构造SE3
-        //cout << "v_t = " << v_t.transpose() << "        v_r = " << v_r.transpose() << endl;
+        //cout << "v_t = " << v_t.transpose() << ",  v_r = " << v_r.transpose() << endl;
         //cout << "v_r.norm = " << v_r.norm() << endl;
         T_c_r_estimated_ = SE3d(quater, v_t);
 
+        //现在已经通过PnP估计出了T_c_r，但是为了提高精度，我们进一步使用g2o对相机位姿进行优化
+        //注意这里仅优化位姿，而不优化地图点
+        typedef g2o::BlockSolver<g2o::BlockSolverTraits<6, 2>> Block;
+        Block::LinearSolverType* linearSolver = new g2o::LinearSolverDense<Block::PoseMatrixType>();
+        Block* solver_ptr = new Block(std::unique_ptr<Block::LinearSolverType>(linearSolver));
+        g2o::OptimizationAlgorithmLevenberg* solver = new g2o::OptimizationAlgorithmLevenberg(std::unique_ptr<Block>(solver_ptr));
+        g2o::SparseOptimizer optimizer;
+        optimizer.setAlgorithm(solver);
+
+        g2o::VertexSE3Expmap* pose = new g2o::VertexSE3Expmap();
+        pose->setId(0);
+        pose->setEstimate(g2o::SE3Quat(
+            T_c_r_estimated_.rotationMatrix(),
+            T_c_r_estimated_.translation()
+            ));
+        optimizer.addVertex(pose);
+
+        // edges
+        for (int i = 0; i < inliers.rows; i++)
+        {
+            int index = inliers.at<int>(i, 0);
+            // 3D -> 2D projection
+            EdgeProjectXYZ2UVPoseOnly* edge = new EdgeProjectXYZ2UVPoseOnly();
+            edge->setId(i);
+            edge->setVertex(0, pose);
+            edge->camera_ = curr_->camera_.get();
+            edge->point_ = Vector3d(pts3d[index].x, pts3d[index].y, pts3d[index].z);
+            edge->setMeasurement(Vector2d(pts2d[index].x, pts2d[index].y));
+            edge->setInformation(Eigen::Matrix2d::Identity());
+            optimizer.addEdge(edge);
+        }
+
+        optimizer.initializeOptimization();
+        optimizer.optimize(10);
+
+        T_c_r_estimated_ = SE3d(
+            pose->estimate().rotation(),
+            pose->estimate().translation()
+            );
     }
 
     // 检查位姿估计是否正确，判断策略是内点数量是否足够，以及运动是否过大
