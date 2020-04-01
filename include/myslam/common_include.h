@@ -30,5 +30,7 @@ using cv::Mat;
 #include <yaml-cpp/yaml.h>
 //#include <boost/timer/timer.hpp>
 
+const double M_PI = 3.14;
+
 using namespace std;
 #endif
