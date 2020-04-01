@@ -3,6 +3,7 @@
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/highgui.hpp>
 #include <opencv2/viz.hpp> 
+#include <opencv2/imgproc/imgproc.hpp>
 //#include <boost/timer/timer.hpp>
 #include "myslam/config.h"
 #include "myslam/visual_odometry.h"
@@ -25,7 +26,7 @@ int main(int argc, char** argv)
         cout << "usage: run_vo parameter_file" << endl;
         return 1;
     }
-    // myslam::Config::get<double>("scale_factor");
+
     myslam::Camera::Ptr camera(new myslam::Camera(
         myslam::Config::get<float>("camera.fx"),
         myslam::Config::get<float>("camera.fy"),
@@ -76,8 +77,9 @@ int main(int argc, char** argv)
     // 准备依次处理图片
     cout << "read total " << rgb_files.size() << " entries" << endl;
     myslam::VisualOdometry::Ptr vo(new myslam::VisualOdometry);
-    for (int i = 0; i < rgb_files.size(); i++)
+    for (int i = 200; i < rgb_files.size(); i++)
     {
+        cout << "****** loop " << i << " ******" << endl;
         // imread 读取图片
         Mat color = cv::imread(rgb_files[i]);
         Mat depth = cv::imread(depth_files[i], -1);
@@ -120,7 +122,16 @@ int main(int argc, char** argv)
                 )
             );
 
-        cv::imshow("image", color );
+        // 将特征点咋彩色图像上标记出来
+        Mat img_show = color.clone();
+        for (auto& pt : vo->map_->map_points_)
+        {
+            myslam::MapPoint::Ptr p = pt.second;
+            Vector2d pixel = pFrame->camera_->world2pixel(p->pos_, pFrame->T_c_w_);
+            cv::circle(img_show, cv::Point2f(pixel(0, 0), pixel(1, 0)), 5, cv::Scalar(0, 255, 0), 2);
+        }
+
+        cv::imshow("image", img_show);   // 显示带有特征点标记的图像
         cv::waitKey(1); 
         vis.setWidgetPose("Camera", M);
         vis.spinOnce(1, false);
