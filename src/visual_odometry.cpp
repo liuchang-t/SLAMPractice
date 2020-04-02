@@ -52,7 +52,8 @@ namespace myslam
             computeDescriptors();
             featureMatching();
             poseEstimationPnP();
-            if (checkEstimatedPose() == true) // a good estimation
+            bool check = checkEstimatedPose();
+            if (check) // a good estimation
             {
                 // 更新当前帧的Tcw矩阵，
                 curr_->T_c_w_ = T_c_w_estimated_;
@@ -192,7 +193,17 @@ namespace myslam
         cv::Mat distCoeffs = cv::Mat::zeros(4, 1, CV_64FC1);
         cv::Mat rvec = cv::Mat::zeros(3, 1, CV_64FC1);          // output rotation vector
         cv::Mat tvec = cv::Mat::zeros(3, 1, CV_64FC1);    // output translation vector
-        cv::solvePnPRansac(pts3d, pts2d, K, distCoeffs, rvec, tvec, false, 100, 4.0, 0.99, inliers);
+
+        // 为rvec和tvec设定初始值，看看能不能增加成功率
+        Eigen::AngleAxisd r_v = Eigen::AngleAxisd(ref_->T_c_w_.rotationMatrix());
+        Eigen::Vector3d r_vector3d(r_v.angle()*r_v.axis());
+        for (int i = 0; i < 3; i++)
+        {
+            rvec.at<double>(i) = r_vector3d(i);
+            tvec.at<double>(i) = ref_->T_c_w_.translation()(i);
+        }
+
+        cv::solvePnPRansac(pts3d, pts2d, K, distCoeffs, rvec, tvec, true, 100, 4.0, 0.99, inliers);
         num_inliers_ = inliers.rows;
         // 打印输出PnP求解的内点数量
         cout<<"pnp inliers: "<<num_inliers_<<endl;
@@ -264,8 +275,11 @@ namespace myslam
             return false;
         }
         // if the motion is too large, it is probably wrong
-        Sophus::Vector6d d = T_c_w_estimated_.log();
-        if (d.norm() > 5.0)
+        // 这里应该判断的是当前帧相对上一帧是否运动过大，如果过大，就要放弃，因此要看的是Trc的值
+        //Sophus::Vector6d d = T_c_w_estimated_.log();
+        Sophus::Vector6d d = (ref_->T_c_w_ * T_c_w_estimated_.inverse()).log();
+        //Vector3d trans = d.head<3>();
+        if (d.norm() > 1)
         {
             cout << "reject because motion is too large: " << d.norm() << endl;
             return false;
