@@ -325,22 +325,30 @@ namespace myslam
     void VisualOdometry::addMapPoints()
     {
         // add the new map points into map
+        // 将当前帧特征点中那些没有匹配到地图点的特征点找出来
         vector<bool> matched(keypoints_curr_.size(), false);
         for (int index : match_2dkp_index_)
             matched[index] = true;
         for (int i = 0; i < keypoints_curr_.size(); i++)
         {
+            // 将当前帧特征点中那些没有匹配到地图点的特征点找出来
             if (matched[i] == true)
                 continue;
-            double d = ref_->findDepth(keypoints_curr_[i]);
+            // 如果他们是有效特征点（深度 >= 0，这里是用参考帧深度判断的，修改为当前帧）
+            //double d = ref_->findDepth(keypoints_curr_[i]);
+            double d = curr_->findDepth(keypoints_curr_[i]);
             if (d < 0)
                 continue;
-            Vector3d p_world = ref_->camera_->pixel2world(
+            // 计算他们的世界坐标（这里使用了当前帧的Tcw，但用的是参考帧的d，修改为当前帧）
+            Vector3d p_world = curr_->camera_->pixel2world(
                 Vector2d(keypoints_curr_[i].pt.x, keypoints_curr_[i].pt.y),
                 curr_->T_c_w_, d
                 );
-            Vector3d n = p_world - ref_->getCamCenter();
+            // 计算他们的视线方向向量（这里使用了参考帧的相机中心坐标，修改为当前帧）
+            //Vector3d n = p_world - ref_->getCamCenter();
+            Vector3d n = p_world - curr_->getCamCenter();
             n.normalize();
+            // 创建mappoint，并插入到地图中
             MapPoint::Ptr map_point = MapPoint::createMapPoint(
                 p_world, n, descriptors_curr_.row(i).clone(), curr_.get()
                 );
@@ -354,17 +362,20 @@ namespace myslam
         // remove the hardly seen and no visible points 
         for (auto iter = map_->map_points_.begin(); iter != map_->map_points_.end(); )
         {
+            // 剔除不在当前帧视野范围内的地图点
             if (!curr_->isInFrame(iter->second->pos_))
             {
                 iter = map_->map_points_.erase(iter);
                 continue;
             }
+            // 剔除那些虽然在视野中，但是总是无法成功与图像匹配的地图点
             float match_ratio = float(iter->second->matched_times_) / iter->second->visible_times_;
             if (match_ratio < map_point_erase_ratio_)
             {
                 iter = map_->map_points_.erase(iter);
                 continue;
             }
+            // 剔除那些参考帧和当前帧观察角度相差过大的地图点，mappoint类的norm_成员（视线方向）都是相对于当初创建它的那一帧相机位置计算的
             double angle = getViewAngle(curr_, iter->second);
             if (angle > M_PI / 6.)
             {
@@ -377,7 +388,7 @@ namespace myslam
             }
             iter++;
         }
-
+        // 如果当前帧匹配到的地图点数量小于100，就执行一遍添加地图点的程序
         if (match_2dkp_index_.size() < 100)
             addMapPoints();
         if (map_->map_points_.size() > 1000)
