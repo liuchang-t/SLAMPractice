@@ -77,7 +77,7 @@ int main(int argc, char** argv)
     // 准备依次处理图片
     cout << "read total " << rgb_files.size() << " entries" << endl;
     myslam::VisualOdometry::Ptr vo(new myslam::VisualOdometry);
-    for (int i = 200; i < rgb_files.size(); i++)
+    for (int i = 0; i < rgb_files.size(); i++)
     {
         cout << "****** loop " << i << " ******" << endl;
         // imread 读取图片
