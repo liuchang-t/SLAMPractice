@@ -69,20 +69,15 @@
     <Import Project="g2o_Debug_x64_v1.props" />
     <Import Project="pcl_Debug_x64_v1.props" />
     <Import Project="PropertySheet_Debug_x64_v1.props" />
-    <Import Project="Eigen_x64_v1.props" />
-    <Import Project="Sophus_v1.props" />
     <Import Project="yaml_cpp_v1.props" />
+    <Import Project="..\Debug_g2o_opencv_pcl_suitesparse_yaml_x64_v1.props" />
+    <Import Project="..\General_Sophus_Eigen_x64_v1.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="suitesparse_Release_x64_v1.props" />
-    <Import Project="opencv_Release_x64_v1.props" />
-    <Import Project="g2o_Release_x64_v1.props" />
-    <Import Project="pcl_Release_x64_v1.props" />
     <Import Project="PropertySheet_Debug_x64_v1.props" />
-    <Import Project="Eigen_x64_v1.props" />
-    <Import Project="Sophus_v1.props" />
-    <Import Project="yaml_cpp_Release_v1.props" />
+    <Import Project="..\Release_g2o_opencv_pcl_suitesparse_yaml_x64_v1.props" />
+    <Import Project="..\General_Sophus_Eigen_x64_v1.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -154,24 +149,24 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\src\camera.cpp" />
-    <ClCompile Include="..\src\config.cpp" />
-    <ClCompile Include="..\src\frame.cpp" />
-    <ClCompile Include="..\src\g2o_types.cpp" />
-    <ClCompile Include="..\src\main.cpp" />
-    <ClCompile Include="..\src\map.cpp" />
-    <ClCompile Include="..\src\mappoint.cpp" />
-    <ClCompile Include="..\src\visual_odometry.cpp" />
+    <ClInclude Include="include\myslam\camera.h" />
+    <ClInclude Include="include\myslam\common_include.h" />
+    <ClInclude Include="include\myslam\config.h" />
+    <ClInclude Include="include\myslam\frame.h" />
+    <ClInclude Include="include\myslam\g2o_types.h" />
+    <ClInclude Include="include\myslam\map.h" />
+    <ClInclude Include="include\myslam\mappoint.h" />
+    <ClInclude Include="include\myslam\visual_odometry.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\include\myslam\camera.h" />
-    <ClInclude Include="..\include\myslam\common_include.h" />
-    <ClInclude Include="..\include\myslam\config.h" />
-    <ClInclude Include="..\include\myslam\frame.h" />
-    <ClInclude Include="..\include\myslam\g2o_types.h" />
-    <ClInclude Include="..\include\myslam\map.h" />
-    <ClInclude Include="..\include\myslam\mappoint.h" />
-    <ClInclude Include="..\include\myslam\visual_odometry.h" />
+    <ClCompile Include="src\camera.cpp" />
+    <ClCompile Include="src\config.cpp" />
+    <ClCompile Include="src\frame.cpp" />
+    <ClCompile Include="src\g2o_types.cpp" />
+    <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\map.cpp" />
+    <ClCompile Include="src\mappoint.cpp" />
+    <ClCompile Include="src\visual_odometry.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

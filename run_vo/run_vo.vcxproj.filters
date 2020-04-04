@@ -15,55 +15,55 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\src\camera.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\config.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\frame.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\map.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\mappoint.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\visual_odometry.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\main.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\g2o_types.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
+    <ClInclude Include="include\myslam\camera.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="include\myslam\common_include.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="include\myslam\config.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="include\myslam\frame.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="include\myslam\g2o_types.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="include\myslam\map.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="include\myslam\mappoint.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="include\myslam\visual_odometry.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\include\myslam\camera.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\myslam\common_include.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\myslam\config.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\myslam\map.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\myslam\mappoint.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\myslam\visual_odometry.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\myslam\frame.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\myslam\g2o_types.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
+    <ClCompile Include="src\camera.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\config.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\frame.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\g2o_types.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\main.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\map.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\mappoint.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\visual_odometry.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

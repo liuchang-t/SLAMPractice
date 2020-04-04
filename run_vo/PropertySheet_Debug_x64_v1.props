@@ -3,7 +3,7 @@
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
-    <IncludePath>C:\Users\LiuChang\source\repos\SLAMPractice\include;$(IncludePath)</IncludePath>
+    <IncludePath>C:\Users\LiuChang\source\repos\SLAM\SLAMPractice\run_vo\include;$(IncludePath)</IncludePath>
     <_PropertySheetDisplayName>PropertySheet_x64_v1</_PropertySheetDisplayName>
   </PropertyGroup>
   <ItemDefinitionGroup />

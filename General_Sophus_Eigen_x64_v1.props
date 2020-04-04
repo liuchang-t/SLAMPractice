@@ -3,8 +3,8 @@
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
-    <IncludePath>C:\Program Files\PCL-1.10.1\include\pcl-1.10;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Program Files\PCL-1.10.1\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\Program1\Sophus;$(IncludePath)</IncludePath>
+    <IncludePath>C:\Program Files\PCL-1.10.1\3rdParty\Eigen\eigen3;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup />
   <ItemGroup />

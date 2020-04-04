@@ -14,7 +14,7 @@ int main(int argc, char** argv)
     if (argc == 1)
     {
         // 没有输入参数，那就用内置的参数
-        myslam::Config::setParameterFile("C:/Users/LiuChang/source/repos/SLAMPractice/config/default.yaml");
+        myslam::Config::setParameterFile("./config/default.yaml");
     }
     else if (argc == 2)
     {
