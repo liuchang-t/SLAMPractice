@@ -206,7 +206,7 @@ namespace myslam
         cv::solvePnPRansac(pts3d, pts2d, K, distCoeffs, rvec, tvec, true, 100, 4.0, 0.99, inliers);
         num_inliers_ = inliers.rows;
         // 打印输出PnP求解的内点数量
-        cout<<"pnp inliers: "<<num_inliers_<<endl;
+        cout<<"pnp inliers: "<< inliers.rows <<endl;
 
         // 将Vector3d类型表示的旋转向量转换为 Eigen::Quaterniond ，然后才能用来构造 SO3 
         // 步骤：先把 Vector3d 类型的旋转向量的模和方向提取出来构造 AngleAxis 类型的旋转向量，
@@ -221,8 +221,7 @@ namespace myslam
         //cout << "v_r.norm = " << v_r.norm() << endl;
         T_c_w_estimated_ = SE3d(quater, v_t);
 
-        //现在已经通过PnP估计出了T_c_w，但是为了提高精度，我们进一步使用g2o对相机位姿进行优化
-        //注意这里仅优化位姿，而不优化地图点
+        // 0.5版本，连同地图点一起优化
         typedef g2o::BlockSolver<g2o::BlockSolverTraits<6, 2>> Block;
         Block::LinearSolverType* linearSolver = new g2o::LinearSolverDense<Block::PoseMatrixType>();
         Block* solver_ptr = new Block(std::unique_ptr<Block::LinearSolverType>(linearSolver));
@@ -230,39 +229,58 @@ namespace myslam
         g2o::SparseOptimizer optimizer;
         optimizer.setAlgorithm(solver);
 
-        g2o::VertexSE3Expmap* pose = new g2o::VertexSE3Expmap();
-        pose->setId(0);
-        pose->setEstimate(g2o::SE3Quat(
+        // 添加位姿节点
+        g2o::VertexSE3Expmap* Vertex_pose = new g2o::VertexSE3Expmap();
+        Vertex_pose->setId(0);
+        Vertex_pose->setEstimate(g2o::SE3Quat(
             T_c_w_estimated_.rotationMatrix(),
             T_c_w_estimated_.translation()
             ));
-        optimizer.addVertex(pose);
+        optimizer.addVertex(Vertex_pose);
 
-        // edges
+        // 添加地图点节点和边
         for (int i = 0; i < inliers.rows; i++)
         {
             int index = inliers.at<int>(i, 0);
-            // 3D -> 2D projection
-            EdgeProjectXYZ2UVPoseOnly* edge = new EdgeProjectXYZ2UVPoseOnly();
+            // 添加 1 个地图点节点
+            g2o::VertexSBAPointXYZ* Vertex_map = new g2o::VertexSBAPointXYZ();
+            Vertex_map->setId(i + 1);
+            Vertex_map->setEstimate(Eigen::Vector3d(pts3d[index].x, pts3d[index].y, pts3d[index].z));
+            optimizer.addVertex(Vertex_map);
+
+            // 添加 1 条边
+            EdgeProjectXYZ2UV* edge = new EdgeProjectXYZ2UV();
             edge->setId(i);
-            edge->setVertex(0, pose);
+            edge->setVertex(0, Vertex_pose);
+            edge->setVertex(1, dynamic_cast<g2o::VertexSBAPointXYZ*>(Vertex_map));
             edge->camera_ = curr_->camera_.get();
-            edge->point_ = Vector3d(pts3d[index].x, pts3d[index].y, pts3d[index].z);
+            //edge->point_ = Vector3d(pts3d[index].x, pts3d[index].y, pts3d[index].z);
             edge->setMeasurement(Vector2d(pts2d[index].x, pts2d[index].y));
             edge->setInformation(Eigen::Matrix2d::Identity());
             optimizer.addEdge(edge);
             // set the inlier map points 
             match_3dpts_[index]->matched_times_++;
         }
-
+        // 进行优化
         optimizer.initializeOptimization();
         optimizer.optimize(10);
 
         T_c_w_estimated_ = SE3d(
-            pose->estimate().rotation(),
-            pose->estimate().translation()
+            Vertex_pose->estimate().rotation(),
+            Vertex_pose->estimate().translation()
             );
         cout << "T_c_w_estimated_: " << endl << T_c_w_estimated_.matrix() << endl;
+
+        if (checkEstimatedPose())
+        {
+            // 如果位姿估计有效，就把地图节点的优化结果作为更准确的值，也跟新一下
+            for (int i = 0; i < inliers.rows; i++)
+            {
+                int index = inliers.at<int>(i, 0);
+                g2o::VertexSBAPointXYZ* v = dynamic_cast<g2o::VertexSBAPointXYZ*> (optimizer.vertex(i + 1));
+                match_3dpts_[index]->pos_ = v->estimate();  // 不知道这样会不会更新到地图点
+            }
+        }
     }
 
     // 检查位姿估计是否正确，判断策略是内点数量是否足够，以及运动是否过大

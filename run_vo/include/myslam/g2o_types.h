@@ -74,7 +74,20 @@ namespace myslam
 		Vector3d point_;
 		Camera* camera_;
 	};
+	class EdgeProjectXYZ2UV : public g2o::BaseBinaryEdge<2, Eigen::Vector2d, g2o::VertexSBAPointXYZ, g2o::VertexSE3Expmap >
+	{
+	public:
+		EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
+			virtual void computeError();
+		virtual void linearizeOplus();
+
+		virtual bool read(std::istream& in) { return 0; }
+		virtual bool write(std::ostream& out) const { return 0; }
+
+		Vector3d point_;
+		Camera* camera_;
+	};
 }
 
 
